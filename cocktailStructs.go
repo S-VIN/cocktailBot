@@ -2,62 +2,71 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 )
 
 type Cocktail struct {
-	idDrink             int
-	strDrink            string
-	strDrinkAlternate   string
-	strTags             string
-	strVideo            string
-	strCategory         string
-	strIBA              string
-	strAlcoholic        string
-	strGlass            string
-	strInstructions     string
-	strDrinkThumb       string
-	strIngredient1      string
-	strIngredient2      string
-	strIngredient3      string
-	strIngredient4      string
-	strIngredient5      string
-	strIngredient6      string
-	strIngredient7      string
-	strIngredient8      string
-	strIngredient9      string
-	strIngredient10     string
-	strIngredient11     string
-	strIngredient12     string
-	strIngredient13     string
-	strIngredient14     string
-	strIngredient15     string
-	strMeasure1         string
-	strMeasure2         string
-	strMeasure3         string
-	strMeasure4         string
-	strMeasure5         string
-	strMeasure6         string
-	strMeasure7         string
-	strMeasure8         string
-	strMeasure9         string
-	strMeasure10        string
-	strMeasure11        string
-	strMeasure12        string
-	strMeasure13        string
-	strMeasure14        string
-	strMeasure15        string
-	strImageSource      string
-	strImageAttribution string
+	IdDrink             string
+	StrDrink            string
+	StrDrinkAlternate   string
+	StrTags             string
+	StrVideo            string
+	StrCategory         string
+	StrIBA              string
+	StrAlcoholic        string
+	StrGlass            string
+	StrInstructions     string
+	StrDrinkThumb       string
+	StrIngredient1      string
+	StrIngredient2      string
+	StrIngredient3      string
+	StrIngredient4      string
+	StrIngredient5      string
+	StrIngredient6      string
+	StrIngredient7      string
+	StrIngredient8      string
+	StrIngredient9      string
+	StrIngredient10     string
+	StrIngredient11     string
+	StrIngredient12     string
+	StrIngredient13     string
+	StrIngredient14     string
+	StrIngredient15     string
+	StrMeasure1         string
+	StrMeasure2         string
+	StrMeasure3         string
+	StrMeasure4         string
+	StrMeasure5         string
+	StrMeasure6         string
+	StrMeasure7         string
+	StrMeasure8         string
+	StrMeasure9         string
+	StrMeasure10        string
+	StrMeasure11        string
+	StrMeasure12        string
+	StrMeasure13        string
+	StrMeasure14        string
+	StrMeasure15        string
+	StrImageSource      string
+	StrImageAttribution string
 }
-
 type Cocktails struct {
 	Drinks []Cocktail
 }
 
-func getRandomCocktail(input string) {
-	var temp Cocktail
-	json.Unmarshal([]byte(input), &temp)
-	fmt.Println(temp)
-	fmt.Println(temp.strDrink)
+
+func getRandomCocktail() (Cocktail, error){
+var cocktail Cocktail
+	resp, err := getRequest("www.thecocktaildb.com/api/json/v1/1/random.php")
+	
+	if (err != nil){
+		return cocktail, err
+	}
+	
+	var temp Cocktails
+	err = json.Unmarshal([]byte(resp), &temp)
+	if (err != nil){
+		return cocktail, err
+	}	
+
+	return temp.Drinks[0], err
 }
