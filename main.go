@@ -6,6 +6,6 @@ import (
 
 
 func main() {
-	resp, _ := getRandomCocktail()
+	resp, _ := lookUpIngredientById("552")
 	fmt.Println(resp)
 }

@@ -16,7 +16,7 @@ func getRequest(url string) (output string, err error) {
 	}
 	client := &http.Client{Transport: tr}
 
-    resp, err := client.Get("https://www.thecocktaildb.com/api/json/v1/1/random.php") 
+    resp, err := client.Get(url) 
     if err != nil { 
         fmt.Println(err) 
         return

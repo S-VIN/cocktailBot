@@ -2,7 +2,17 @@ package main
 
 import (
 	"encoding/json"
+	
 )
+
+type Ingredient struct {
+	IdIngredient	string
+	StrIngredient	string
+	StrDescription	string
+	StrType			string	
+	StrAlcohol		string
+	StrABV			string
+}
 
 type Cocktail struct {
 	IdDrink             string
@@ -49,24 +59,60 @@ type Cocktail struct {
 	StrImageSource      string
 	StrImageAttribution string
 }
+
 type Cocktails struct {
 	Drinks []Cocktail
 }
 
+type Ingred struct{
+	Ingredients []Ingredient
+}
 
-func getRandomCocktail() (Cocktail, error){
-var cocktail Cocktail
+func getRandomCocktail() (Cocktail, error) {
+	var cocktails Cocktails
 	resp, err := getRequest("www.thecocktaildb.com/api/json/v1/1/random.php")
-	
-	if (err != nil){
-		return cocktail, err
-	}
-	
-	var temp Cocktails
-	err = json.Unmarshal([]byte(resp), &temp)
-	if (err != nil){
-		return cocktail, err
-	}	
 
-	return temp.Drinks[0], err
+	if err != nil {
+		return cocktails.Drinks[0], err
+	}
+
+	err = json.Unmarshal([]byte(resp), &cocktails)
+	if err != nil {
+		return cocktails.Drinks[0], err
+	}
+
+	return cocktails.Drinks[0], err
+}
+
+func searchByIngredient(ingredient string) (Cocktails, error){
+	var cocktails Cocktails
+	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/filter.php?i=" + ingredient)
+
+	if err != nil {
+		return cocktails, err
+	}
+
+	err = json.Unmarshal([]byte(resp), &cocktails)
+	if err != nil {
+		return cocktails, err
+	}
+
+	return cocktails, err
+}
+
+func lookUpIngredientById(id string) (Ingredient, error){
+	var ingredients []Ingredient
+	ingredients[0] = {}
+	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/lookup.php?iid=" + id)
+
+	if err != nil {
+		return ingredients[0], err
+	}
+
+	err = json.Unmarshal([]byte(resp), &ingredients)
+	if err != nil {
+		return ingredients[0], err
+	}
+
+	return ingredients[0], err
 }
