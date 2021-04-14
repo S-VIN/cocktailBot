@@ -2,8 +2,8 @@ package main
 
 import (
 	//"fmt"
-	"math/rand"
-	"strconv"
+	//"math/rand"
+	//"strconv"
 	//"strings"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -12,15 +12,17 @@ var telegram Telegram
 
 var replyKeyboard = tgbotapi.NewReplyKeyboard(
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("СЛУЧАЙНЫЙ АНЕК"),
+		tgbotapi.NewKeyboardButton("Lookup a random cocktail"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("СЛУЧАЙНЫЙ СМЕШНОЙ АНЕК"),
-		tgbotapi.NewKeyboardButton("СЛУЧАЙНЫЙ НЕСМЕШНОЙ АНЕК"),
+		tgbotapi.NewKeyboardButton("Search by ingredient"),
 	),
 	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("СЛУЧАЙНЫЙ ИЗБРАННЫЙ АНЕК"),
-		tgbotapi.NewKeyboardButton("СПИСОК ИЗБРАННЫХ АНЕКОВ"),
+		tgbotapi.NewKeyboardButton("Get like list"),
+	),
+	tgbotapi.NewKeyboardButtonRow(
+		tgbotapi.NewKeyboardButton("Search ingredient by name"),
+		tgbotapi.NewKeyboardButton("Search cocktail by name"),
 	),
 )
 
@@ -45,54 +47,32 @@ func (t Telegram) SendMessage(chatID int64, input string) error {
 }
 
 func (t Telegram) SendReplyKeyboard(chatID int64) error {
-	msg := tgbotapi.NewMessage(chatID, "Чтобы было проще хихикать, пользуйся клавиатурой.")
+	msg := tgbotapi.NewMessage(chatID, "")
 	msg.ReplyMarkup = replyKeyboard
 	_, err := t.bot.Send(msg)
 	return err
 }
 
-func (t Telegram) SendAnek(chatID int64, id int) error {
-	if id < 0 || id > len(database.arrayOfAneks) {
-		return nil
-	}
+func (t Telegram) SendCocktail(chatID int64, cocktail Cocktail) error {
 
-	var likesKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+	var shortCocktailKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData(strconv.Itoa(database.arrayOfAneks[id].GetLikes())+" 👍🏻", "l"+strconv.Itoa(id)),
-			tgbotapi.NewInlineKeyboardButtonData(strconv.Itoa(database.arrayOfAneks[id].GetDislikes())+" 👎🏾", "d"+strconv.Itoa(id)),
+			tgbotapi.NewInlineKeyboardButtonData("details", "details"),
 		),
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("🤎", "f"+strconv.Itoa(id)),
+			tgbotapi.NewInlineKeyboardButtonData("🤎", "liked"),
 		),
 	)
 
-	msg := tgbotapi.NewMessage(chatID, database.GetAnekText(id))
-	msg.ReplyMarkup = likesKeyboard
+	msg := tgbotapi.NewMessage(chatID, cocktail.StrDrink+cocktail.StrIngredient1)
+	msg.ReplyMarkup = shortCocktailKeyboard
 	_, err := t.bot.Send(msg)
 	return err
 }
 
 func (t *Telegram) GetResponseFromInline(chatID int64, input string, callbackQuerryID string) {
-	temp, _ := strconv.Atoi(input[1:len(input)])
-	switch os := input[0]; os {
-	case 'l':
-		if !database.IsLike(chatID, temp) {
-			database.Like(chatID, temp)
-		} else {
-			t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(callbackQuerryID, "Ну ты и шалун! Любишь шалить! Лайк то ты уже поставил."))
-		}
-	case 'd':
-		if !database.IsDislike(chatID, temp) {
-			database.Dislike(chatID, temp)
-		} else {
-			t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(callbackQuerryID, "Ух, какой ты злой. Проверь сахар. Дизлайк уже стоял."))
-		}
-	case 'f':
-		if !database.IsFavourite(chatID, temp) {
-			database.Favourite(chatID, temp)
-		} else {
-			t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(callbackQuerryID, "Анек не смешной, а ты его второй раз в избранное добавляешь."))
-		}
+	if input == "details" {
+		t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(callbackQuerryID, "details"))
 	}
 }
 
@@ -123,46 +103,12 @@ func (t Telegram) CreateAnswer(input tgbotapi.Message) {
 	case "/start":
 		t.SendReplyKeyboard(input.Chat.ID)
 
-	case "СЛУЧАЙНЫЙ АНЕК":
-		t.SendAnek(input.Chat.ID, rand.Intn(anekQuantity))
-
-	case "СЛУЧАЙНЫЙ СМЕШНОЙ АНЕК":
-		textOfAnek, index := database.GetRandomLikedAnek(input.Chat.ID)
-		if textOfAnek == "" {
-			t.SendMessage(input.Chat.ID, "Смешных анеков нет. Можешь посмотреть в зеркало.")
-		} else {
-			t.SendAnek(input.Chat.ID, index)
-		}
-
-	case "СЛУЧАЙНЫЙ НЕСМЕШНОЙ АНЕК":
-		textOfAnek, index := database.GetRandomDislikedAnek(input.Chat.ID)
-		if textOfAnek == "" {
-			t.SendMessage(input.Chat.ID, "Несмешных анеков нет. Смейся, любитель похохотать.")
-		} else {
-			t.SendAnek(input.Chat.ID, index)
-		}
-
-	case "СЛУЧАЙНЫЙ ИЗБРАННЫЙ АНЕК":
-		textOfAnek, index := database.GetRandomFavouriteAnek(input.Chat.ID)
-		if textOfAnek == "" {
-			t.SendMessage(input.Chat.ID, "Ты ничего не любишь. Твоё сердце пусто. Обычно такие люди умирают в одиночестве.")
-		} else {
-			t.SendAnek(input.Chat.ID, index)
-		}
-
-	case "СПИСОК ИЗБРАННЫХ АНЕКОВ":
-		temp, _ := database.GetRandomFavouriteAnek(input.Chat.ID)
-		if temp == "" {
-			t.SendMessage(input.Chat.ID, "А вот <3 тебе, а не список.")
-		}
-		t.SendMessage(input.Chat.ID, database.GetStringOfFavourites(input.Chat.ID))
+	case "Lookup a random cocktail":
+		temp, _ := getRandomCocktail()
+		t.SendCocktail(input.Chat.ID, temp)
 
 	default:
-		i, err := strconv.Atoi(input.Text)
-		if err == nil && i >= 0 && i < anekQuantity {
-			t.SendAnek(input.Chat.ID, i)
-		} else {
-			t.SendMessage(input.Chat.ID, "Ты что, дурачок? Нажимай на кнопки, либо пиши число. Число должно быть правильным, а не как обычно.")
-		}
+		t.SendMessage(input.Chat.ID, "Ты что, дурачок? Нажимай на кнопки, либо пиши число. Число должно быть правильным, а не как обычно.")
+
 	}
 }

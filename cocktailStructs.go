@@ -2,7 +2,7 @@ package main
 
 import (
 	"encoding/json"
-	
+	//"fmt"
 )
 
 type Ingredient struct {
@@ -61,16 +61,16 @@ type Cocktail struct {
 }
 
 type Cocktails struct {
-	Drinks []Cocktail
+	Drinks [1]Cocktail //at least one empty element. because err returned
 }
 
 type Ingreds struct{
-	Ingredients []Ingredient
+	Ingredients [1]Ingredient
 }
 
 func getRandomCocktail() (Cocktail, error) {
 	var cocktails Cocktails
-	resp, err := getRequest("www.thecocktaildb.com/api/json/v1/1/random.php")
+	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/random.php")
 
 	if err != nil {
 		return cocktails.Drinks[0], err
@@ -153,6 +153,7 @@ func searchIngredientByName(name string) (Ingredient, error){
 
 func searchCocktailByName(name string) (Cocktail, error){
 	var cocktails Cocktails
+
 	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/search.php?s=" + name)
 
 	if err != nil {

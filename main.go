@@ -1,11 +1,14 @@
 package main
 
-import (
-   "fmt"
-)
+import "fmt"
+
 
 
 func main() {
-	resp, _ := searchCocktailByName("vodka")
-	fmt.Println(resp)
+
+	err := telegram.CreateBot()
+	if err != nil{
+		fmt.Println(err)
+	}
+	telegram.CheckUpdates()
 }
