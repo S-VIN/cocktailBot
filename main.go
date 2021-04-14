@@ -6,6 +6,6 @@ import (
 
 
 func main() {
-	resp, _ := lookUpIngredientById("552")
+	resp, _ := searchCocktailByName("vodka")
 	fmt.Println(resp)
 }
