@@ -5,6 +5,8 @@ import (
 	//"math/rand"
 	//"strconv"
 	//"strings"
+	"fmt"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -47,7 +49,7 @@ func (t Telegram) SendMessage(chatID int64, input string) error {
 }
 
 func (t Telegram) SendReplyKeyboard(chatID int64) error {
-	msg := tgbotapi.NewMessage(chatID, "")
+	msg := tgbotapi.NewMessage(chatID, " ")
 	msg.ReplyMarkup = replyKeyboard
 	_, err := t.bot.Send(msg)
 	return err
@@ -58,13 +60,17 @@ func (t Telegram) SendCocktail(chatID int64, cocktail Cocktail) error {
 	var shortCocktailKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("details", "details"),
-		),
-		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("🤎", "liked"),
 		),
 	)
 
-	msg := tgbotapi.NewMessage(chatID, cocktail.StrDrink+cocktail.StrIngredient1)
+	var temp = "**" + cocktail.StrDrink + "**"
+	fmt.Println(cocktail)
+	for i := 0; i < 15; i++{
+		temp += string(cocktail.listOfIngridients[i])
+		temp += "\n"
+	}
+	msg := tgbotapi.NewMessage(chatID, temp)
 	msg.ReplyMarkup = shortCocktailKeyboard
 	_, err := t.bot.Send(msg)
 	return err
@@ -108,7 +114,7 @@ func (t Telegram) CreateAnswer(input tgbotapi.Message) {
 		t.SendCocktail(input.Chat.ID, temp)
 
 	default:
-		t.SendMessage(input.Chat.ID, "Ты что, дурачок? Нажимай на кнопки, либо пиши число. Число должно быть правильным, а не как обычно.")
+		t.SendMessage(input.Chat.ID, "Unknown command")
 
 	}
 }

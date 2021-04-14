@@ -26,6 +26,7 @@ type Cocktail struct {
 	StrGlass            string
 	StrInstructions     string
 	StrDrinkThumb       string
+	Ingridients     [15]string
 	StrIngredient1      string
 	StrIngredient2      string
 	StrIngredient3      string
@@ -41,6 +42,7 @@ type Cocktail struct {
 	StrIngredient13     string
 	StrIngredient14     string
 	StrIngredient15     string
+	Meashures       [15]string
 	StrMeasure1         string
 	StrMeasure2         string
 	StrMeasure3         string
@@ -58,6 +60,40 @@ type Cocktail struct {
 	StrMeasure15        string
 	StrImageSource      string
 	StrImageAttribution string
+	listOfIngridients   string
+}
+
+func squeezeCocktail(cocktail *Cocktail){
+	cocktail.Ingridients[0] = cocktail.StrIngredient1
+	cocktail.Ingridients[1] = cocktail.StrIngredient2
+	cocktail.Ingridients[2] = cocktail.StrIngredient3
+	cocktail.Ingridients[3] = cocktail.StrIngredient4
+	cocktail.Ingridients[4] = cocktail.StrIngredient5
+	cocktail.Ingridients[5] = cocktail.StrIngredient6
+	cocktail.Ingridients[6] = cocktail.StrIngredient7
+	cocktail.Ingridients[7] = cocktail.StrIngredient8
+	cocktail.Ingridients[8] = cocktail.StrIngredient9
+	cocktail.Ingridients[9] = cocktail.StrIngredient10
+	cocktail.Ingridients[10] = cocktail.StrIngredient11
+	cocktail.Ingridients[11] = cocktail.StrIngredient12
+	cocktail.Ingridients[12] = cocktail.StrIngredient13
+	cocktail.Ingridients[13] = cocktail.StrIngredient14
+	cocktail.Ingridients[14] = cocktail.StrIngredient15
+	cocktail.Meashures[0] = cocktail.StrMeasure1
+	cocktail.Meashures[1] = cocktail.StrMeasure2
+	cocktail.Meashures[2] = cocktail.StrMeasure3
+	cocktail.Meashures[3] = cocktail.StrMeasure4
+	cocktail.Meashures[4] = cocktail.StrMeasure5
+	cocktail.Meashures[5] = cocktail.StrMeasure6
+	cocktail.Meashures[6] = cocktail.StrMeasure7
+	cocktail.Meashures[7] = cocktail.StrMeasure8
+	cocktail.Meashures[8] = cocktail.StrMeasure9
+	cocktail.Meashures[9] = cocktail.StrMeasure10
+	cocktail.Meashures[10] = cocktail.StrMeasure11
+	cocktail.Meashures[11] = cocktail.StrMeasure12
+	cocktail.Meashures[12] = cocktail.StrMeasure13
+	cocktail.Meashures[13] = cocktail.StrMeasure14
+	cocktail.Meashures[14] = cocktail.StrMeasure15
 }
 
 type Cocktails struct {
@@ -80,7 +116,8 @@ func getRandomCocktail() (Cocktail, error) {
 	if err != nil {
 		return cocktails.Drinks[0], err
 	}
-
+	
+	squeezeCocktail(&cocktails.Drinks[0])
 	return cocktails.Drinks[0], err
 }
 
