@@ -66,7 +66,7 @@ func (t Telegram) SendCocktail(chatID int64, cocktail Cocktail) error {
 
 	var temp = "**" + cocktail.StrDrink + "**"
 	fmt.Println(cocktail)
-	for i := 0; i < 15; i++{
+	for i := 0; i < 15; i++ {
 		temp += string(cocktail.listOfIngridients[i])
 		temp += "\n"
 	}

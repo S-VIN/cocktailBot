@@ -6,12 +6,12 @@ import (
 )
 
 type Ingredient struct {
-	IdIngredient	string
-	StrIngredient	string
-	StrDescription	string
-	StrType			string	
-	StrAlcohol		string
-	StrABV			string
+	IdIngredient   string
+	StrIngredient  string
+	StrDescription string
+	StrType        string
+	StrAlcohol     string
+	StrABV         string
 }
 
 type Cocktail struct {
@@ -26,7 +26,7 @@ type Cocktail struct {
 	StrGlass            string
 	StrInstructions     string
 	StrDrinkThumb       string
-	Ingridients     [15]string
+	Ingridients         [15]string
 	StrIngredient1      string
 	StrIngredient2      string
 	StrIngredient3      string
@@ -42,7 +42,7 @@ type Cocktail struct {
 	StrIngredient13     string
 	StrIngredient14     string
 	StrIngredient15     string
-	Meashures       [15]string
+	Meashures           [15]string
 	StrMeasure1         string
 	StrMeasure2         string
 	StrMeasure3         string
@@ -63,7 +63,7 @@ type Cocktail struct {
 	listOfIngridients   string
 }
 
-func squeezeCocktail(cocktail *Cocktail){
+func squeezeCocktail(cocktail *Cocktail) {
 	cocktail.Ingridients[0] = cocktail.StrIngredient1
 	cocktail.Ingridients[1] = cocktail.StrIngredient2
 	cocktail.Ingridients[2] = cocktail.StrIngredient3
@@ -100,7 +100,7 @@ type Cocktails struct {
 	Drinks [1]Cocktail //at least one empty element. because err returned
 }
 
-type Ingreds struct{
+type Ingreds struct {
 	Ingredients [1]Ingredient
 }
 
@@ -116,12 +116,12 @@ func getRandomCocktail() (Cocktail, error) {
 	if err != nil {
 		return cocktails.Drinks[0], err
 	}
-	
+
 	squeezeCocktail(&cocktails.Drinks[0])
 	return cocktails.Drinks[0], err
 }
 
-func searchByIngredient(ingredient string) (Cocktails, error){
+func searchByIngredient(ingredient string) (Cocktails, error) {
 	var cocktails Cocktails
 	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/filter.php?i=" + ingredient)
 
@@ -137,9 +137,9 @@ func searchByIngredient(ingredient string) (Cocktails, error){
 	return cocktails, err
 }
 
-func lookUpIngredientById(id string) (Ingredient, error){
+func lookUpIngredientById(id string) (Ingredient, error) {
 	var ingredients Ingreds
-	
+
 	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/lookup.php?iid=" + id)
 
 	if err != nil {
@@ -154,7 +154,7 @@ func lookUpIngredientById(id string) (Ingredient, error){
 	return ingredients.Ingredients[0], err
 }
 
-func lookUpFullCocktailDetailById(id string) (Cocktail, error){
+func lookUpFullCocktailDetailById(id string) (Cocktail, error) {
 	var cocktails Cocktails
 	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i=" + id)
 
@@ -170,10 +170,9 @@ func lookUpFullCocktailDetailById(id string) (Cocktail, error){
 	return cocktails.Drinks[0], err
 }
 
-
-func searchIngredientByName(name string) (Ingredient, error){
+func searchIngredientByName(name string) (Ingredient, error) {
 	var ingredients Ingreds
-	
+
 	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/search.php?i=" + name)
 
 	if err != nil {
@@ -188,7 +187,7 @@ func searchIngredientByName(name string) (Ingredient, error){
 	return ingredients.Ingredients[0], err
 }
 
-func searchCocktailByName(name string) (Cocktail, error){
+func searchCocktailByName(name string) (Cocktail, error) {
 	var cocktails Cocktails
 
 	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/search.php?s=" + name)
