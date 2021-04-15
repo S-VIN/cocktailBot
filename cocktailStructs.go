@@ -109,12 +109,14 @@ func getRandomCocktail() (Cocktail, error) {
 	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/random.php")
 
 	if err != nil {
-		return cocktails.Drinks[0], err
+		var empty Cocktail
+		return empty, err
 	}
 
 	err = json.Unmarshal([]byte(resp), &cocktails)
 	if err != nil {
-		return cocktails.Drinks[0], err
+		var empty Cocktail
+		return empty, err
 	}
 
 	squeezeCocktail(&cocktails.Drinks[0])
@@ -126,6 +128,7 @@ func searchByIngredient(ingredient string) (Cocktails, error) {
 	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/filter.php?i=" + ingredient)
 
 	if err != nil {
+		
 		return cocktails, err
 	}
 
