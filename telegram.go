@@ -52,18 +52,21 @@ func (t Telegram) SendReplyKeyboard(chatID int64) error {
 }
 
 func (t *Telegram) GetResponseFromInline(chatID int64, input string, callbackQuerryID string) {
-	if input[0] == 'l' {
+	switch input[0]{
+	case 'l':
 		if database.isLike(chatID, input[1:]) {
 			database.like(chatID, input[1:])
 			t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(callbackQuerryID, "like added"))
 		} else {
 			t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(callbackQuerryID, "like was added before"))
 		}
-
-	} else {
-		cocktail, _ := lookUpCocktailId(input)
+	case 'd':
+		cocktail, _ := lookUpCocktailId(input[1:])
 		SendDetailedCocktail(chatID, cocktail, t.bot)
-	}
+	case 's':
+		t.SendMessage(chatID, "type a number of cocktail")
+		clientStatus.status[chatID] = WFLLIST
+}
 }
 
 func (t Telegram) CheckUpdates() error {
@@ -118,6 +121,10 @@ func (t Telegram) CreateAnswer(input tgbotapi.Message) {
 			cocktail, _ := searchByIngredient(input.Text)
 			SendCocktail(input.Chat.ID, cocktail.Drinks[0], t.bot)
 			clientStatus.status[input.Chat.ID] = DONE
+		}
+
+		if clientStatus.status[input.Chat.ID] == WFLLIST {
+			cocktail, _ := lookUpFullCocktailDetailById(input.Text)
 		}
 
 	}

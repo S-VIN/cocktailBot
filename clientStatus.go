@@ -3,6 +3,7 @@ package main
 const (
 	WFINGR = iota
 	WFNAME
+	WFLLIST
 	DONE
 )
 
