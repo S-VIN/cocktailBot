@@ -16,4 +16,3 @@ type ClientStatus struct{
 	status map[int64]int
 }
 
-var clientStatus ClientStatus
