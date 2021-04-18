@@ -37,4 +37,5 @@ func (database Database) getRangeOfLikes(chatID int64) *[]string {
 
 func (database Database) getLikedByIndex(chatID int64, index int) string {
 	//hahahaha you need to have list instead of map in likes, loser
+	return ""
 }

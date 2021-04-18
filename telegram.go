@@ -124,7 +124,7 @@ func (t Telegram) CreateAnswer(input tgbotapi.Message) {
 		}
 
 		if clientStatus.status[input.Chat.ID] == WFLLIST {
-			cocktail, _ := lookUpFullCocktailDetailById(input.Text)
+			//cocktail, _ := lookUpFullCocktailDetailById(input.Text)
 		}
 
 	}

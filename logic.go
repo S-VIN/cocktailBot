@@ -26,6 +26,7 @@ func SendCocktail(chatID int64, cocktail Cocktail, bot *tgbotapi.BotAPI) error {
 	}
 	msg := tgbotapi.NewMessage(chatID, temp)
 	msg.ReplyMarkup = shortCocktailKeyboard
+	msg.ParseMode = tgbotapi.ModeMarkdown
 	_, err := bot.Send(msg)
 	return err
 }
@@ -58,7 +59,7 @@ func SendDetailedCocktail(chatID int64, cocktail Cocktail, bot *tgbotapi.BotAPI)
 	msg.Caption = textAnswer
 
 	msg.ReplyMarkup = shortCocktailKeyboard
-
+	msg.ParseMode = tgbotapi.ModeMarkdown
 	_, err := bot.Send(msg)
 
 	return err
