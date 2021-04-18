@@ -128,7 +128,7 @@ func searchByIngredient(ingredient string) (Cocktails, error) {
 	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/filter.php?i=" + ingredient)
 
 	if err != nil {
-		
+
 		return cocktails, err
 	}
 
