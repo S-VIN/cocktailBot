@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -17,7 +17,6 @@ func getRequest(url string) (output string, err error) {
 
 	resp, err := client.Get(url)
 	if err != nil {
-		fmt.Println(err)
 		return
 	}
 	defer resp.Body.Close()

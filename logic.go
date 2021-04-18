@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"strconv"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -10,12 +12,11 @@ func SendCocktail(chatID int64, cocktail Cocktail, bot *tgbotapi.BotAPI) error {
 	var shortCocktailKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
 			tgbotapi.NewInlineKeyboardButtonData("details", cocktail.IdDrink),
-			tgbotapi.NewInlineKeyboardButtonData("🤎", "liked"),
+			tgbotapi.NewInlineKeyboardButtonData("🤎", "l" + cocktail.IdDrink),
 		),
 	)
 
 	var temp = "*" + cocktail.StrDrink + "* " + "(" + cocktail.StrGlass + ")" + "\n"
-	fmt.Println(cocktail)
 	for i := 0; i < 15; i++ {
 		if cocktail.Ingridients[i] != "" {
 			temp += "✅"
@@ -67,7 +68,8 @@ func SendRangeOfCocktails(inputIDS *[]string, chatID int64, bot *tgbotapi.BotAPI
 	var messageString string
 	for iter, value := range(*inputIDS){
 		cocktail, _ := lookUpCocktailId(value)
-		messageString += string(iter) + ") "
+		fmt.Println(iter)
+		messageString += strconv.Itoa(iter) + ") "
 		messageString += cocktail.StrDrink + "\n"
 	}
 	msg := tgbotapi.NewMessage(chatID, messageString)

@@ -1,11 +1,7 @@
 package main
 
 import (
-	//"math/rand"
-	//"strconv"
-	//"strings"
 	"fmt"
-
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -33,6 +29,7 @@ type Telegram struct {
 
 func (t *Telegram) CreateBot() (err error) {
 	clientStatus.status = make(map[int64]int)
+	database = *NewDatabase()
 	t.bot, err = tgbotapi.NewBotAPI("1356963581:AAGPlUyAkofdhcehODZ-jvIv9Qu9T196pRQ")
 	if err != nil {
 		return err
@@ -95,8 +92,7 @@ func (t Telegram) CreateAnswer(input tgbotapi.Message) {
 		t.SendReplyKeyboard(input.Chat.ID)
 
 	case "Lookup a random cocktail":
-		temp, err := getRandomCocktail()
-		fmt.Println(err)
+		temp, _ := getRandomCocktail()
 		SendCocktail(input.Chat.ID, temp, t.bot)
 
 	case "Search by ingredient":
@@ -108,6 +104,7 @@ func (t Telegram) CreateAnswer(input tgbotapi.Message) {
 		clientStatus.status[input.Chat.ID] = WFNAME
 
 	case "Get like list":
+		fmt.Println(database.getRangeOfLikes(input.Chat.ID))
 		SendRangeOfCocktails(database.getRangeOfLikes(input.Chat.ID), input.Chat.ID, t.bot)
 
 	default:
