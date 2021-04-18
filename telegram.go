@@ -59,7 +59,7 @@ func (t Telegram) SendCocktail(chatID int64, cocktail Cocktail) error {
 
 	var shortCocktailKeyboard = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
-			tgbotapi.NewInlineKeyboardButtonData("details", "details"),
+			tgbotapi.NewInlineKeyboardButtonData("details", cocktail.IdDrink),
 			tgbotapi.NewInlineKeyboardButtonData("🤎", "liked"),
 		),
 	)
@@ -115,8 +115,11 @@ func (t Telegram) SendDetailedCocktail(chatID int64, cocktail Cocktail) error{
 }
 
 func (t *Telegram) GetResponseFromInline(chatID int64, input string, callbackQuerryID string) {
-	if input == "details" {
+	if input == "liked" {
 		t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(callbackQuerryID, "dekjhgj"))
+	} else {
+		cocktail, _ := lookUpCocktailId(input)
+		t.SendDetailedCocktail(chatID, cocktail)
 	}
 }
 
@@ -129,7 +132,7 @@ func (t Telegram) CheckUpdates() error {
 	for update := range updates {
 		if update.CallbackQuery != nil {
 			t.GetResponseFromInline(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data, update.CallbackQuery.ID)
-			t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, "Молодец! Твой палец записан, куда надо."))
+			t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, ""))
 		}
 
 		if update.Message == nil {
@@ -141,19 +144,35 @@ func (t Telegram) CheckUpdates() error {
 }
 
 func (t Telegram) CreateAnswer(input tgbotapi.Message) {
-
 	switch input.Text {
-
 	case "/start":
 		t.SendReplyKeyboard(input.Chat.ID)
 
 	case "Lookup a random cocktail":
 		temp, err := getRandomCocktail()
 		fmt.Println(err)
-		t.SendDetailedCocktail(input.Chat.ID, temp)
+		t.SendCocktail(input.Chat.ID, temp)
+
+	case "Search by ingridient":
+		t.SendMessage(input.Chat.ID, "Type the ingridient")
+		clientStatus.status[input.Chat.ID] = WFINGR
+	
+	case "Search by name":
+		t.SendMessage(input.Chat.ID, "Type the name")
+		clientStatus.status[input.Chat.ID] = WFNAME
 
 	default:
-		t.SendMessage(input.Chat.ID, "Unknown command")
+		if(clientStatus.status[input.Chat.ID] == WFINGR){
+			cocktail, _:= searchByIngredient(input.Text)
+			t.SendCocktail(input.Chat.ID, cocktail.Drinks[0])
+			clientStatus.status[input.Chat.ID] = DONE
+		}
+
+		if(clientStatus.status[input.Chat.ID] == WFNAME){
+			cocktail, _:= searchByIngredient(input.Text)
+			t.SendCocktail(input.Chat.ID, cocktail.Drinks[0])
+			clientStatus.status[input.Chat.ID] = DONE
+		}
 
 	}
 }

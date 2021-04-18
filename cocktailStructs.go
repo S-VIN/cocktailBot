@@ -206,3 +206,21 @@ func searchCocktailByName(name string) (Cocktail, error) {
 
 	return cocktails.Drinks[0], err
 }
+
+func lookUpCocktailId(Id string) (Cocktail, error) {
+	var cocktails Cocktails
+
+	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/lookup.php?i=" + Id)
+
+	if err != nil {
+		return cocktails.Drinks[0], err
+	}
+
+	err = json.Unmarshal([]byte(resp), &cocktails)
+	if err != nil {
+		return cocktails.Drinks[0], err
+	}
+
+	squeezeCocktail(&cocktails.Drinks[0])
+	return cocktails.Drinks[0], err
+}
