@@ -1,9 +1,8 @@
 package main
 
-import (
-//"fmt"
+//import "strconv"
 
-)
+//"fmt"
 
 type Database struct {
 	likes map[int64]Set
@@ -16,27 +15,28 @@ func NewDatabase() *Database {
 }
 
 func (database *Database) like(chatID int64, cocktailID string) {
-	temp := database.likes[chatID]
-	if temp == nil{
-		
+	_, ok := database.likes[chatID]
+	if !ok{
+		database.likes[chatID] = *NewSet()
 	}
+	temp := database.likes[chatID]
 	temp.Add(cocktailID)
 }
 
 func (database Database) isLike(chatID int64, cocktailID string) bool {
-	_, ok := database.likes[chatID][cocktailID]
-	return !ok
+	return database.likes[chatID].Find(cocktailID)
 }
 
-func (database Database) getRangeOfLikes(chatID int64) *[]string {
+func (database Database) getRangeOfLikes(chatID int64) []string {
 	var result []string
-	for key := range database.likes[chatID] {
-		result = append(result, key)
+	for i := 0; i < database.likes[chatID].GetSize(); i++ {
+		value, _ := database.likes[chatID].GetByIndex(i)
+		result = append(result, value)
 	}
-	return &result
+	return result
 }
 
 func (database Database) getLikedByIndex(chatID int64, index int) string {
-	//hahahaha you need to have set instead of map in likes, loser
-	return ""
+	res, _ := database.likes[chatID].GetByIndex(index)
+	return res
 }

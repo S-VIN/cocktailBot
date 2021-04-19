@@ -54,7 +54,7 @@ func (t Telegram) SendReplyKeyboard(chatID int64) error {
 func (t *Telegram) GetResponseFromInline(chatID int64, input string, callbackQuerryID string) {
 	switch input[0]{
 	case 'l':
-		if database.isLike(chatID, input[1:]) {
+		if !database.isLike(chatID, input[1:]) {
 			database.like(chatID, input[1:])
 			t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(callbackQuerryID, "like added"))
 		} else {

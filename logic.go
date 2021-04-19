@@ -65,14 +65,14 @@ func SendDetailedCocktail(chatID int64, cocktail Cocktail, bot *tgbotapi.BotAPI)
 	return err
 }
 
-func SendRangeOfCocktails(inputIDS *[]string, chatID int64, bot *tgbotapi.BotAPI) error {
+func SendRangeOfCocktails(inputIDS []string, chatID int64, bot *tgbotapi.BotAPI) error {
 	var messageString string
-	for iter, value := range *inputIDS {
+	for iter, value := range inputIDS {
 		cocktail, _ := lookUpCocktailId(value)
-		fmt.Println(iter)
 		messageString += strconv.Itoa(iter) + ") "
 		messageString += cocktail.StrDrink + "\n"
 	}
+	fmt.Println(messageString)
 	msg := tgbotapi.NewMessage(chatID, messageString)
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(

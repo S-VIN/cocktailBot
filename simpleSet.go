@@ -14,13 +14,17 @@ func (set *Set) Add(input string)bool{
 	return true
 }
 
-func (set Set) Get(index int) (string, error){
+func (set Set) GetByIndex(index int) (string, error){
 	res, ok := set.data[index]
 	if ok {
 		return res, nil
 	}else{
 		return "", nil
 	}
+}
+
+func (set Set) GetSize() int{
+	return set.size
 }
 
 func (set Set) Find(input string) bool{
