@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"strconv"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -124,7 +126,11 @@ func (t Telegram) CreateAnswer(input tgbotapi.Message) {
 		}
 
 		if clientStatus.status[input.Chat.ID] == WFLLIST {
-			//cocktail, _ := lookUpFullCocktailDetailById(input.Text)
+			index, _:= strconv.Atoi(input.Text)
+			cocktailID := database.getLikedByIndex(input.Chat.ID, index)
+			cocktail, _ := lookUpFullCocktailDetailById(cocktailID)
+			SendDetailedCocktail(input.Chat.ID, cocktail, t.bot)
+			clientStatus.status[input.Chat.ID] = DONE
 		}
 
 	}
