@@ -1,16 +1,15 @@
 package main
 
+import(
+	//"fmt"
+)
+
 type Set struct{
 	data map[int]string
-	size int
 }
 
 func (set *Set) Add(input string)bool{
-	if(set.Find(input)){
-		return false
-	}
-	set.data[set.size] = input
-	set.size++
+	set.data[set.GetSize()] = input
 	return true
 }
 
@@ -24,7 +23,7 @@ func (set Set) GetByIndex(index int) (string, error){
 }
 
 func (set Set) GetSize() int{
-	return set.size
+	return len(set.data)
 }
 
 func (set Set) Find(input string) bool{

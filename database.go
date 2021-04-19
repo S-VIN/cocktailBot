@@ -1,9 +1,5 @@
 package main
 
-//import "strconv"
-
-//"fmt"
-
 type Database struct {
 	likes map[int64]Set
 }
@@ -16,7 +12,7 @@ func NewDatabase() *Database {
 
 func (database *Database) like(chatID int64, cocktailID string) {
 	_, ok := database.likes[chatID]
-	if !ok{
+	if  !ok {
 		database.likes[chatID] = *NewSet()
 	}
 	temp := database.likes[chatID]
