@@ -120,7 +120,7 @@ func (t Telegram) CreateAnswer(input tgbotapi.Message) {
 		}
 
 		if clientStatus.status[input.Chat.ID] == WFNAME {
-			cocktail, _ := searchByIngredient(input.Text)
+			cocktail, _ := searchCocktailByName(input.Text)
 			SendCocktail(input.Chat.ID, cocktail.Drinks[0], t.bot)
 			clientStatus.status[input.Chat.ID] = DONE
 		}
