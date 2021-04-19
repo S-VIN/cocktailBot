@@ -6,20 +6,21 @@ import (
 )
 
 type Database struct {
-	likes map[int64]map[string]bool
+	likes map[int64]Set
 }
 
 func NewDatabase() *Database {
 	var database Database
-	database.likes = make(map[int64]map[string]bool)
+	database.likes = make(map[int64]Set)
 	return &database
 }
 
 func (database *Database) like(chatID int64, cocktailID string) {
-	if database.likes[chatID] == nil {
-		database.likes[chatID] = make(map[string]bool)
+	temp := database.likes[chatID]
+	if temp == nil{
+		
 	}
-	database.likes[chatID][cocktailID] = true
+	temp.Add(cocktailID)
 }
 
 func (database Database) isLike(chatID int64, cocktailID string) bool {
@@ -36,6 +37,6 @@ func (database Database) getRangeOfLikes(chatID int64) *[]string {
 }
 
 func (database Database) getLikedByIndex(chatID int64, index int) string {
-	//hahahaha you need to have list instead of map in likes, loser
+	//hahahaha you need to have set instead of map in likes, loser
 	return ""
 }
