@@ -169,7 +169,7 @@ func lookUpFullCocktailDetailById(id string) (Cocktail, error) {
 	if err != nil {
 		return cocktails.Drinks[0], err
 	}
-
+	squeezeCocktail(&cocktails.Drinks[0])
 	return cocktails.Drinks[0], err
 }
 
@@ -192,7 +192,7 @@ func searchIngredientByName(name string) (Ingredient, error) {
 
 func searchCocktailByName(name string) (result []Cocktail, err error) {
 	var cocktails Cocktails
-
+	
 	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/search.php?s=" + name)
 
 	if err != nil {
@@ -205,7 +205,7 @@ func searchCocktailByName(name string) (result []Cocktail, err error) {
 	}
 
 	for _, item := range(cocktails.Drinks){
-		if(item == Cocktail{}){
+		if(item.IdDrink == ""){
 			break
 		}
 		squeezeCocktail(&item)

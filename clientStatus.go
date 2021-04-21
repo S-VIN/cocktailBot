@@ -3,7 +3,7 @@ package main
 const (
 	WFINGR = iota
 	WFNAME
-	WFLLIST
+	WFLIST
 	DONE
 )
 
@@ -14,4 +14,5 @@ type keyboardStatus struct {
 
 type ClientStatus struct {
 	status map[int64]int
+	shownCocktails map[int64][]string
 }

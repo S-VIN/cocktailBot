@@ -31,6 +31,7 @@ type Telegram struct {
 
 func (t *Telegram) CreateBot() (err error) {
 	clientStatus.status = make(map[int64]int)
+	clientStatus.shownCocktails = make(map[int64][]string)
 	database = *NewDatabase()
 	t.bot, err = tgbotapi.NewBotAPI("1356963581:AAGPlUyAkofdhcehODZ-jvIv9Qu9T196pRQ")
 	if err != nil {
@@ -67,7 +68,7 @@ func (t *Telegram) GetResponseFromInline(chatID int64, input string, callbackQue
 		SendDetailedCocktail(chatID, cocktail, t.bot)
 	case 's':
 		t.SendMessage(chatID, "type a number of cocktail")
-		clientStatus.status[chatID] = WFLLIST
+		clientStatus.status[chatID] = WFLIST
 	}
 }
 
@@ -113,36 +114,32 @@ func (t Telegram) CreateAnswer(input tgbotapi.Message) {
 		SendRangeOfCocktails(database.getRangeOfLikes(input.Chat.ID), input.Chat.ID, t.bot)
 
 	default:
-		if clientStatus.status[input.Chat.ID] == WFINGR {
+		switch clientStatus.status[input.Chat.ID] {
+		case WFINGR:
 			cocktails, _ := searchByIngredient(input.Text)
 			var cocktailIDS []string
 			for _, value := range cocktails.Drinks {
 				cocktailIDS = append(cocktailIDS, value.IdDrink)
 			}
-			fmt.Println(cocktailIDS)
 			SendRangeOfCocktails(cocktailIDS, input.Chat.ID, t.bot)
-			clientStatus.status[input.Chat.ID] = DONE
-		}
+			clientStatus.status[input.Chat.ID] = WFLIST
 
-		if clientStatus.status[input.Chat.ID] == WFNAME {
+		case WFNAME:
 			cocktails, _ := searchCocktailByName(input.Text)
 			var cocktailIDS []string
-			fmt.Println(cocktails)
 			for _, value := range cocktails {
 				cocktailIDS = append(cocktailIDS, value.IdDrink)
-				fmt.Println(cocktailIDS)
 			}
-			
 			SendRangeOfCocktails(cocktailIDS, input.Chat.ID, t.bot)
-			clientStatus.status[input.Chat.ID] = DONE
-		}
+			clientStatus.status[input.Chat.ID] = WFLIST
 
-		if clientStatus.status[input.Chat.ID] == WFLLIST {
+		case WFLIST:
 			index, _ := strconv.Atoi(input.Text)
-			cocktailID := database.getLikedByIndex(input.Chat.ID, index)
+			cocktailID := clientStatus.shownCocktails[input.Chat.ID][index]
 			cocktail, _ := lookUpFullCocktailDetailById(cocktailID)
 			SendDetailedCocktail(input.Chat.ID, cocktail, t.bot)
 			clientStatus.status[input.Chat.ID] = DONE
+
 		}
 
 	}

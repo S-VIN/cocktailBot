@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -72,7 +72,6 @@ func SendRangeOfCocktails(inputIDS []string, chatID int64, bot *tgbotapi.BotAPI)
 		messageString += strconv.Itoa(iter) + ") "
 		messageString += cocktail.StrDrink + "\n"
 	}
-	fmt.Println(messageString)
 	msg := tgbotapi.NewMessage(chatID, messageString)
 	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardRow(
@@ -80,6 +79,7 @@ func SendRangeOfCocktails(inputIDS []string, chatID int64, bot *tgbotapi.BotAPI)
 		),
 	)
 	_, err := bot.Send(msg)
+	clientStatus.shownCocktails[chatID] = inputIDS
 	return err
 }
 
