@@ -1,46 +1,10 @@
 package main
 
 import (
-	"fmt"
-	"strconv"
-
+	//"fmt"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"strconv"
 )
-
-var telegram Telegram
-var clientStatus ClientStatus
-var database Database
-
-var replyKeyboard = tgbotapi.NewReplyKeyboard(
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("Lookup a random cocktail"),
-	),
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("Get like list"),
-	),
-	tgbotapi.NewKeyboardButtonRow(
-		tgbotapi.NewKeyboardButton("Search by name"),
-		tgbotapi.NewKeyboardButton("Search by ingredient"),
-	),
-)
-
-type Telegram struct {
-	bot       *tgbotapi.BotAPI
-	botConfig tgbotapi.UpdateConfig
-}
-
-func (t *Telegram) CreateBot() (err error) {
-	clientStatus.status = make(map[int64]int)
-	clientStatus.shownCocktails = make(map[int64][]string)
-	database = *NewDatabase()
-	t.bot, err = tgbotapi.NewBotAPI("1356963581:AAGPlUyAkofdhcehODZ-jvIv9Qu9T196pRQ")
-	if err != nil {
-		return err
-	}
-	t.botConfig = tgbotapi.NewUpdate(0)
-	t.botConfig.Timeout = 60
-	return nil
-}
 
 func (t Telegram) SendMessage(chatID int64, input string) error {
 	_, err := t.bot.Send(tgbotapi.NewMessage(chatID, input))
@@ -54,93 +18,106 @@ func (t Telegram) SendReplyKeyboard(chatID int64) error {
 	return err
 }
 
-func (t *Telegram) GetResponseFromInline(chatID int64, input string, callbackQuerryID string) {
-	switch input[0] {
-	case 'l':
-		if !database.isLike(chatID, input[1:]) {
-			database.like(chatID, input[1:])
-			t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(callbackQuerryID, "like added"))
-		} else {
-			t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(callbackQuerryID, "like was added before"))
+func (t Telegram) SendCocktail(chatID int64, cocktail Cocktail) error {
+
+	var shortCocktailKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("details", "d"+cocktail.IdDrink),
+			tgbotapi.NewInlineKeyboardButtonData("🤎", "l"+cocktail.IdDrink),
+		),
+	)
+
+	var temp = "*" + cocktail.StrDrink + "* " + "(" + cocktail.StrGlass + ")" + "\n"
+	for i := 0; i < 15; i++ {
+		if cocktail.Ingridients[i] != "" {
+			temp += "✅"
 		}
-	case 'd':
-		cocktail, _ := lookUpCocktailId(input[1:])
-		SendDetailedCocktail(chatID, cocktail, t.bot)
-	case 's':
-		t.SendMessage(chatID, "type a number of cocktail")
-		clientStatus.status[chatID] = WFLIST
+		temp += string(cocktail.Ingridients[i])
+		temp += "\n"
 	}
+	msg := tgbotapi.NewMessage(chatID, temp)
+	msg.ReplyMarkup = shortCocktailKeyboard
+	msg.ParseMode = tgbotapi.ModeMarkdown
+	_, err := t.bot.Send(msg)
+	return err
 }
 
-func (t Telegram) CheckUpdates() error {
-	updates, err := t.bot.GetUpdatesChan(t.botConfig)
-	if err != nil {
-		return err
+func (t Telegram) SendDetailedCocktail(chatID int64, cocktail Cocktail) error {
+	var shortCocktailKeyboard = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("🤎", "l"+cocktail.IdDrink),
+		),
+	)
+
+	var textAnswer = "*" + cocktail.StrDrink + "* " + "\n" + "\n"
+	textAnswer += "glass:\n" + cocktail.StrGlass + "\n" + "\n"
+	textAnswer += "instruction:\n" + cocktail.StrInstructions + "\n" + "\n"
+	textAnswer += "ingridients:" + "\n"
+	for i := 0; i < 15; i++ {
+		if cocktail.Ingridients[i] == "" {
+			break
+		}
+		textAnswer += "✅"
+		textAnswer += string(cocktail.Ingridients[i])
+		textAnswer += " - " + string(cocktail.Meashures[i])
+		textAnswer += "\n"
 	}
 
-	for update := range updates {
-		if update.CallbackQuery != nil {
-			t.GetResponseFromInline(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data, update.CallbackQuery.ID)
-			t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, ""))
-		}
+	msg := tgbotapi.NewPhotoUpload(chatID, nil)
+	msg.FileID = cocktail.StrDrinkThumb
+	msg.UseExisting = true
 
-		if update.Message == nil {
-			continue
-		}
-		t.CreateAnswer(*update.Message)
-	}
-	return nil
+	msg.Caption = textAnswer
+
+	msg.ReplyMarkup = shortCocktailKeyboard
+	msg.ParseMode = tgbotapi.ModeMarkdown
+	_, err := t.bot.Send(msg)
+
+	return err
 }
 
-func (t Telegram) CreateAnswer(input tgbotapi.Message) {
-	switch input.Text {
-	case "/start":
-		t.SendReplyKeyboard(input.Chat.ID)
-
-	case "Lookup a random cocktail":
-		temp, _ := getRandomCocktail()
-		SendCocktail(input.Chat.ID, temp, t.bot)
-
-	case "Search by ingredient":
-		t.SendMessage(input.Chat.ID, "Type the ingredient")
-		clientStatus.status[input.Chat.ID] = WFINGR
-
-	case "Search by name":
-		t.SendMessage(input.Chat.ID, "Type the name")
-		clientStatus.status[input.Chat.ID] = WFNAME
-
-	case "Get like list":
-		fmt.Println(database.getRangeOfLikes(input.Chat.ID))
-		SendRangeOfCocktails(database.getRangeOfLikes(input.Chat.ID), input.Chat.ID, t.bot)
-
-	default:
-		switch clientStatus.status[input.Chat.ID] {
-		case WFINGR:
-			cocktails, _ := searchByIngredient(input.Text)
-			var cocktailIDS []string
-			for _, value := range cocktails.Drinks {
-				cocktailIDS = append(cocktailIDS, value.IdDrink)
-			}
-			SendRangeOfCocktails(cocktailIDS, input.Chat.ID, t.bot)
-			clientStatus.status[input.Chat.ID] = WFLIST
-
-		case WFNAME:
-			cocktails, _ := searchCocktailByName(input.Text)
-			var cocktailIDS []string
-			for _, value := range cocktails {
-				cocktailIDS = append(cocktailIDS, value.IdDrink)
-			}
-			SendRangeOfCocktails(cocktailIDS, input.Chat.ID, t.bot)
-			clientStatus.status[input.Chat.ID] = WFLIST
-
-		case WFLIST:
-			index, _ := strconv.Atoi(input.Text)
-			cocktailID := clientStatus.shownCocktails[input.Chat.ID][index]
-			cocktail, _ := lookUpFullCocktailDetailById(cocktailID)
-			SendDetailedCocktail(input.Chat.ID, cocktail, t.bot)
-			clientStatus.status[input.Chat.ID] = DONE
-
-		}
-
+func (t Telegram) SendRangeOfCocktails(inputIDS []string, chatID int64) error {
+	var messageString string
+	for iter, value := range inputIDS {
+		cocktail, _ := lookUpCocktailId(value)
+		messageString += strconv.Itoa(iter) + ") "
+		messageString += cocktail.StrDrink + "\n"
 	}
+	msg := tgbotapi.NewMessage(chatID, messageString)
+	msg.ReplyMarkup = tgbotapi.NewInlineKeyboardMarkup(
+		tgbotapi.NewInlineKeyboardRow(
+			tgbotapi.NewInlineKeyboardButtonData("show one", "s"),
+		),
+	)
+	_, err := t.bot.Send(msg)
+	clientStatus.shownCocktails[chatID] = inputIDS
+	return err
+}
+
+func (t Telegram) answerIngredient(chatID int64, textFromKeyboard string) {
+	cocktails, _ := searchByIngredient(textFromKeyboard)
+	var cocktailIDS []string
+	for _, value := range cocktails {
+		cocktailIDS = append(cocktailIDS, value.IdDrink)
+	}
+	t.SendRangeOfCocktails(cocktailIDS, chatID)
+	clientStatus.status[chatID] = WFLIST
+}
+
+func (t Telegram) answerName(chatID int64, textFromKeyboard string) {
+	cocktails, _ := searchCocktailByName(textFromKeyboard)
+	var cocktailIDS []string
+	for _, value := range cocktails {
+		cocktailIDS = append(cocktailIDS, value.IdDrink)
+	}
+	t.SendRangeOfCocktails(cocktailIDS, chatID)
+	clientStatus.status[chatID] = WFLIST
+}
+
+func (t Telegram) answerList(chatID int64, numberFromKeyboard string) {
+	index, _ := strconv.Atoi(numberFromKeyboard)
+	cocktailID := clientStatus.shownCocktails[chatID][index]
+	cocktail, _ := lookUpFullCocktailDetailById(cocktailID)
+	t.SendDetailedCocktail(chatID, cocktail)
+	clientStatus.status[chatID] = DONE
 }

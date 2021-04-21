@@ -60,7 +60,6 @@ type Cocktail struct {
 	StrMeasure15        string
 	StrImageSource      string
 	StrImageAttribution string
-	listOfIngridients   string
 }
 
 func squeezeCocktail(cocktail *Cocktail) {
@@ -123,23 +122,6 @@ func getRandomCocktail() (Cocktail, error) {
 	return cocktails.Drinks[0], err
 }
 
-func searchByIngredient(ingredient string) (Cocktails, error) {
-	var cocktails Cocktails
-	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/filter.php?i=" + ingredient)
-
-	if err != nil {
-
-		return cocktails, err
-	}
-
-	err = json.Unmarshal([]byte(resp), &cocktails)
-	if err != nil {
-		return cocktails, err
-	}
-
-	return cocktails, err
-}
-
 func lookUpIngredientById(id string) (Ingredient, error) {
 	var ingredients Ingreds
 
@@ -192,26 +174,49 @@ func searchIngredientByName(name string) (Ingredient, error) {
 
 func searchCocktailByName(name string) (result []Cocktail, err error) {
 	var cocktails Cocktails
-	
+
 	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/search.php?s=" + name)
 
 	if err != nil {
-		return 
+		return
 	}
 
 	err = json.Unmarshal([]byte(resp), &cocktails)
 	if err != nil {
-		return 
+		return
 	}
 
-	for _, item := range(cocktails.Drinks){
-		if(item.IdDrink == ""){
+	for _, item := range cocktails.Drinks {
+		if item.IdDrink == "" {
 			break
 		}
 		squeezeCocktail(&item)
 		result = append(result, item)
 	}
-	return 
+	return
+}
+
+func searchByIngredient(ingredient string) (result []Cocktail, err error) {
+	var cocktails Cocktails
+	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/filter.php?i=" + ingredient)
+
+	if err != nil {
+		return
+	}
+
+	err = json.Unmarshal([]byte(resp), &cocktails)
+	if err != nil {
+		return
+	}
+
+	for _, item := range cocktails.Drinks {
+		if item.IdDrink == "" {
+			break
+		}
+		squeezeCocktail(&item)
+		result = append(result, item)
+	}
+	return
 }
 
 func lookUpCocktailId(Id string) (Cocktail, error) {
