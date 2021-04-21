@@ -82,3 +82,4 @@ func SendRangeOfCocktails(inputIDS []string, chatID int64, bot *tgbotapi.BotAPI)
 	_, err := bot.Send(msg)
 	return err
 }
+

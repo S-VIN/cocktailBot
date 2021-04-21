@@ -97,11 +97,11 @@ func squeezeCocktail(cocktail *Cocktail) {
 }
 
 type Cocktails struct {
-	Drinks [1]Cocktail //at least one empty element. because err returned
+	Drinks [24]Cocktail //24 - max.
 }
 
 type Ingreds struct {
-	Ingredients [1]Ingredient
+	Ingredients [24]Ingredient
 }
 
 func getRandomCocktail() (Cocktail, error) {
@@ -190,25 +190,28 @@ func searchIngredientByName(name string) (Ingredient, error) {
 	return ingredients.Ingredients[0], err
 }
 
-func searchCocktailByName(name string) (Cocktails, error) {
+func searchCocktailByName(name string) (result []Cocktail, err error) {
 	var cocktails Cocktails
 
 	resp, err := getRequest("https://www.thecocktaildb.com/api/json/v1/1/search.php?s=" + name)
 
 	if err != nil {
-		return cocktails, err
+		return 
 	}
 
 	err = json.Unmarshal([]byte(resp), &cocktails)
 	if err != nil {
-		return cocktails, err
+		return 
 	}
 
-	for _, item := range(&cocktails.Drinks){
+	for _, item := range(cocktails.Drinks){
+		if(item == Cocktail{}){
+			break
+		}
 		squeezeCocktail(&item)
-	} 
-
-	return cocktails, err
+		result = append(result, item)
+	}
+	return 
 }
 
 func lookUpCocktailId(Id string) (Cocktail, error) {

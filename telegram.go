@@ -54,7 +54,7 @@ func (t Telegram) SendReplyKeyboard(chatID int64) error {
 }
 
 func (t *Telegram) GetResponseFromInline(chatID int64, input string, callbackQuerryID string) {
-	switch input[0]{
+	switch input[0] {
 	case 'l':
 		if !database.isLike(chatID, input[1:]) {
 			database.like(chatID, input[1:])
@@ -68,7 +68,7 @@ func (t *Telegram) GetResponseFromInline(chatID int64, input string, callbackQue
 	case 's':
 		t.SendMessage(chatID, "type a number of cocktail")
 		clientStatus.status[chatID] = WFLLIST
-}
+	}
 }
 
 func (t Telegram) CheckUpdates() error {
@@ -114,19 +114,31 @@ func (t Telegram) CreateAnswer(input tgbotapi.Message) {
 
 	default:
 		if clientStatus.status[input.Chat.ID] == WFINGR {
-			cocktail, _ := searchByIngredient(input.Text)
-			SendCocktail(input.Chat.ID, cocktail.Drinks[0], t.bot)
+			cocktails, _ := searchByIngredient(input.Text)
+			var cocktailIDS []string
+			for _, value := range cocktails.Drinks {
+				cocktailIDS = append(cocktailIDS, value.IdDrink)
+			}
+			fmt.Println(cocktailIDS)
+			SendRangeOfCocktails(cocktailIDS, input.Chat.ID, t.bot)
 			clientStatus.status[input.Chat.ID] = DONE
 		}
 
 		if clientStatus.status[input.Chat.ID] == WFNAME {
-			cocktail, _ := searchCocktailByName(input.Text)
-			SendCocktail(input.Chat.ID, cocktail.Drinks[0], t.bot)
+			cocktails, _ := searchCocktailByName(input.Text)
+			var cocktailIDS []string
+			fmt.Println(cocktails)
+			for _, value := range cocktails {
+				cocktailIDS = append(cocktailIDS, value.IdDrink)
+				fmt.Println(cocktailIDS)
+			}
+			
+			SendRangeOfCocktails(cocktailIDS, input.Chat.ID, t.bot)
 			clientStatus.status[input.Chat.ID] = DONE
 		}
 
 		if clientStatus.status[input.Chat.ID] == WFLLIST {
-			index, _:= strconv.Atoi(input.Text)
+			index, _ := strconv.Atoi(input.Text)
 			cocktailID := database.getLikedByIndex(input.Chat.ID, index)
 			cocktail, _ := lookUpFullCocktailDetailById(cocktailID)
 			SendDetailedCocktail(input.Chat.ID, cocktail, t.bot)
