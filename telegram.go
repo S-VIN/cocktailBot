@@ -94,30 +94,48 @@ func (t Telegram) SendRangeOfCocktails(inputIDS []string, chatID int64) error {
 	return err
 }
 
-func (t Telegram) answerIngredient(chatID int64, textFromKeyboard string) {
-	cocktails, _ := searchByIngredient(textFromKeyboard)
+func (t Telegram) answerIngredient(chatID int64, textFromKeyboard string) error{
+	cocktails, err := searchByIngredient(textFromKeyboard)
+	if err != nil{
+		return err
+	}
 	var cocktailIDS []string
 	for _, value := range cocktails {
 		cocktailIDS = append(cocktailIDS, value.IdDrink)
 	}
 	t.SendRangeOfCocktails(cocktailIDS, chatID)
 	clientStatus.status[chatID] = WFLIST
+	return nil
 }
 
-func (t Telegram) answerName(chatID int64, textFromKeyboard string) {
-	cocktails, _ := searchCocktailByName(textFromKeyboard)
+func (t Telegram) answerName(chatID int64, textFromKeyboard string) error{
+	cocktails, err := searchCocktailByName(textFromKeyboard)
+	if err != nil{
+		return err
+	}
 	var cocktailIDS []string
 	for _, value := range cocktails {
 		cocktailIDS = append(cocktailIDS, value.IdDrink)
 	}
 	t.SendRangeOfCocktails(cocktailIDS, chatID)
 	clientStatus.status[chatID] = WFLIST
+	return nil
 }
 
-func (t Telegram) answerList(chatID int64, numberFromKeyboard string) {
-	index, _ := strconv.Atoi(numberFromKeyboard)
+func (t Telegram) answerList(chatID int64, numberFromKeyboard string) error{
+	index, err := strconv.Atoi(numberFromKeyboard)
+	if(err != nil){
+		t.SendMessage(chatID, "wrong number")
+	}
 	cocktailID := clientStatus.shownCocktails[chatID][index]
-	cocktail, _ := lookUpFullCocktailDetailById(cocktailID)
-	t.SendDetailedCocktail(chatID, cocktail)
+	cocktail, err := lookUpFullCocktailDetailById(cocktailID)
+	if err != nil{
+		return err
+	}
+	err = t.SendDetailedCocktail(chatID, cocktail)
+	if err != nil{
+		return err
+	}
 	clientStatus.status[chatID] = DONE
+	return nil
 }

@@ -30,7 +30,8 @@ func (t *Telegram) CreateBot() (err error) {
 
 	clientStatus.status = make(map[int64]int)
 	clientStatus.shownCocktails = make(map[int64][]string)
-	database = *NewDatabase()
+	//database = *NewFDatabase()
+	database.Init()
 
 	t.bot, err = tgbotapi.NewBotAPI("1356963581:AAGPlUyAkofdhcehODZ-jvIv9Qu9T196pRQ")
 	if err != nil {
@@ -45,8 +46,8 @@ func (t *Telegram) CreateBot() (err error) {
 func (t *Telegram) GetResponseFromInline(chatID int64, input string, callbackQuerryID string) {
 	switch input[0] {
 	case 'l':
-		if !database.isLike(chatID, input[1:]) {
-			database.like(chatID, input[1:])
+		if res, _ := database.IsLike(chatID, input[1:]); !res {
+			database.Like(chatID, input[1:])
 			t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(callbackQuerryID, "like added"))
 		} else {
 			t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(callbackQuerryID, "like was added before"))
@@ -98,7 +99,8 @@ func (t Telegram) CreateAnswer(input tgbotapi.Message) {
 		clientStatus.status[input.Chat.ID] = WFNAME
 
 	case "Get like list":
-		t.SendRangeOfCocktails(database.getRangeOfLikes(input.Chat.ID), input.Chat.ID)
+		res, _ := database.GetRangeOfLikes(input.Chat.ID)
+		t.SendRangeOfCocktails(res, input.Chat.ID)
 
 	default:
 		switch clientStatus.status[input.Chat.ID] {
