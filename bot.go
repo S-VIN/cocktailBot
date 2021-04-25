@@ -33,10 +33,6 @@ func (t *Telegram) CreateBot() (err error) {
 	clientStatus.status = make(map[int64]int)
 	clientStatus.shownCocktails = make(map[int64][]string)
 	//database = *NewFDatabase()
-	err = database.Init()
-	if err != nil {
-		return err
-	}
 
 	t.bot, err = tgbotapi.NewBotAPI("1356963581:AAGPlUyAkofdhcehODZ-jvIv9Qu9T196pRQ")
 	if err != nil {

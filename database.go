@@ -7,6 +7,8 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 )
 
+
+
 // FAKE DATABASE
 type FDatabase struct {
 	likes map[int64]Set
@@ -54,12 +56,12 @@ type Database struct {
 	db *sql.DB
 }
 
-func (database *Database) Init() (err error) {
-	database.db, err = sql.Open("sqlite3", "likes.db")
-	return err
-}
-
 func (database *Database) GetRangeOfLikes(chatID int64) (result []string, err error) {
+	database.db, err = sql.Open("sqlite3", "likes.db")
+	defer database.db.Close()
+	if err != nil{
+		return 
+	}
 	sqlResult, err := database.db.Query("select distinct likesStr from likes where chatID==" + strconv.FormatInt(chatID, 10))
 	for sqlResult.Next() {
 		result = append(result, "")
@@ -71,15 +73,22 @@ func (database *Database) GetRangeOfLikes(chatID int64) (result []string, err er
 	return
 }
 
-func (database *Database) Like(chatID int64, cocktailID string) error {
-	_, err := database.db.Exec("insert into likes values (" + strconv.FormatInt(chatID, 10) + ", '" + cocktailID + "')")
-	for err != nil {
-		database.db.Exec("insert into likes values (" + strconv.FormatInt(chatID, 10) + ", '" + cocktailID + "')")
+func (database *Database) Like(chatID int64, cocktailID string)(err error) {
+	database.db, err = sql.Open("sqlite3", "likes.db")
+	defer database.db.Close()
+	if err != nil{
+		return 
 	}
-	return nil
+	_, err = database.db.Exec("insert into likes values (" + strconv.FormatInt(chatID, 10) + ", '" + cocktailID + "')")
+	return err
 }
 
-func (database *Database) IsLike(chatID int64, cocktailID string) (bool, error) {
+func (database *Database) IsLike(chatID int64, cocktailID string) (res bool, err error) {
+	database.db, err = sql.Open("sqlite3", "likes.db")
+	defer database.db.Close()
+	if err != nil{
+		return 
+	}
 	sqlResult, err := database.db.Query("select distinct likesStr from likes where chatID==" + strconv.FormatInt(chatID, 10) + " and likesStr==" + "'" + cocktailID + "'")
 	if err != nil {
 		return false, err
