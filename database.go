@@ -73,8 +73,8 @@ func (database *Database) GetRangeOfLikes(chatID int64) (result []string, err er
 
 func (database *Database) Like(chatID int64, cocktailID string) error {
 	_, err := database.db.Exec("insert into likes values (" + strconv.FormatInt(chatID, 10) + ", '" + cocktailID + "')")
-	if err != nil {
-		return err
+	for err != nil {
+		database.db.Exec("insert into likes values (" + strconv.FormatInt(chatID, 10) + ", '" + cocktailID + "')")
 	}
 	return nil
 }

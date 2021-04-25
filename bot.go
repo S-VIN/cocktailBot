@@ -1,6 +1,8 @@
 package main
 
 import (
+	"errors"
+	"strconv"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
@@ -31,7 +33,10 @@ func (t *Telegram) CreateBot() (err error) {
 	clientStatus.status = make(map[int64]int)
 	clientStatus.shownCocktails = make(map[int64][]string)
 	//database = *NewFDatabase()
-	database.Init()
+	err = database.Init()
+	if err != nil {
+		return err
+	}
 
 	t.bot, err = tgbotapi.NewBotAPI("1356963581:AAGPlUyAkofdhcehODZ-jvIv9Qu9T196pRQ")
 	if err != nil {
@@ -43,22 +48,43 @@ func (t *Telegram) CreateBot() (err error) {
 	return nil
 }
 
-func (t *Telegram) GetResponseFromInline(chatID int64, input string, callbackQuerryID string) {
+func (t *Telegram) GetResponseFromInline(chatID int64, input string, callbackQuerryID string) error {
+	if input == "" {
+		return errors.New("empty inline input")
+	}
 	switch input[0] {
 	case 'l':
-		if res, _ := database.IsLike(chatID, input[1:]); !res {
-			database.Like(chatID, input[1:])
+		if res, err := database.IsLike(chatID, input[1:]); !res {
+			if err != nil {
+				return err
+			}
+			err = database.Like(chatID, input[1:])
+			if err != nil {
+				return err
+			}
 			t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(callbackQuerryID, "like added"))
 		} else {
 			t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(callbackQuerryID, "like was added before"))
 		}
 	case 'd':
-		cocktail, _ := lookUpCocktailId(input[1:])
-		t.SendDetailedCocktail(chatID, cocktail)
+		cocktail, err := lookUpCocktailId(input[1:])
+		if err != nil {
+			return err
+		}
+		err = t.SendDetailedCocktail(chatID, cocktail)
+		if err != nil {
+			return err
+		}
 	case 's':
-		t.SendMessage(chatID, "type a number of cocktail")
+		err := t.SendMessage(chatID, "type a number of cocktail")
+		if err != nil {
+			return err
+		}
 		clientStatus.status[chatID] = WFLIST
+	default:
+		return errors.New("wrong inline input, input = " + input)
 	}
+	return nil
 }
 
 func (t Telegram) CheckUpdates() error {
@@ -69,8 +95,14 @@ func (t Telegram) CheckUpdates() error {
 
 	for update := range updates {
 		if update.CallbackQuery != nil {
-			t.GetResponseFromInline(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data, update.CallbackQuery.ID)
-			t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, ""))
+			err := t.GetResponseFromInline(update.CallbackQuery.Message.Chat.ID, update.CallbackQuery.Data, update.CallbackQuery.ID)
+			if err != nil {
+				return err
+			}
+			_, err = t.bot.AnswerCallbackQuery(tgbotapi.NewCallback(update.CallbackQuery.ID, ""))
+			if err != nil {
+				return err
+			}
 		}
 
 		if update.Message == nil {
@@ -82,38 +114,64 @@ func (t Telegram) CheckUpdates() error {
 }
 
 func (t Telegram) CreateAnswer(input tgbotapi.Message) {
+	logInf.Println(strconv.FormatInt(input.Chat.ID, 10) + ": CreateAnswer, input: " + input.Text)
 	switch input.Text {
 	case "/start":
-		t.SendReplyKeyboard(input.Chat.ID)
+		err := t.SendReplyKeyboard(input.Chat.ID)
+		if err != nil {
+			logErr.Println(err.Error())
+		}
 
 	case "Lookup a random cocktail":
-		temp, _ := getRandomCocktail()
-		t.SendCocktail(input.Chat.ID, temp)
+		temp, err := getRandomCocktail()
+		if err != nil {
+			logErr.Println(err.Error())
+		}
+		err = t.SendCocktail(input.Chat.ID, temp)
+		if err != nil {
+			logErr.Println(err.Error())
+		}
 
 	case "Search by ingredient":
-		t.SendMessage(input.Chat.ID, "Type the ingredient")
+		err := t.SendMessage(input.Chat.ID, "Type the ingredient")
+		if err != nil {
+			logErr.Println(err.Error())
+		}
 		clientStatus.status[input.Chat.ID] = WFINGR
 
 	case "Search by name":
-		t.SendMessage(input.Chat.ID, "Type the name")
+		err := t.SendMessage(input.Chat.ID, "Type the name")
+		if err != nil {
+			logErr.Println(err.Error())
+		}
 		clientStatus.status[input.Chat.ID] = WFNAME
 
 	case "Get like list":
-		res, _ := database.GetRangeOfLikes(input.Chat.ID)
-		t.SendRangeOfCocktails(res, input.Chat.ID)
-
-	default:
-		switch clientStatus.status[input.Chat.ID] {
-		case WFINGR:
-			t.answerIngredient(input.Chat.ID, input.Text)
-
-		case WFNAME:
-			t.answerName(input.Chat.ID, input.Text)
-
-		case WFLIST:
-			t.answerList(input.Chat.ID, input.Text)
-
+		res, err := database.GetRangeOfLikes(input.Chat.ID)
+		if err != nil {
+			logErr.Println(err.Error())
+		}
+		err = t.SendRangeOfCocktails(res, input.Chat.ID)
+		if err != nil {
+			logErr.Println(err.Error())
 		}
 
+	default:
+		var err error
+		switch clientStatus.status[input.Chat.ID] {
+		case WFINGR:
+			err = t.answerIngredient(input.Chat.ID, input.Text)
+
+		case WFNAME:
+			err = t.answerName(input.Chat.ID, input.Text)
+
+		case WFLIST:
+			err = t.answerList(input.Chat.ID, input.Text)
+		default:
+			err = t.SendMessage(input.Chat.ID, "unknown command")
+		}
+		if err != nil{
+			logErr.Println(err.Error())
+		}
 	}
 }

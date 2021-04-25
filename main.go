@@ -1,25 +1,30 @@
 package main
 
-import "fmt"
+import (
+	"log"
+	"os"
+)
+
+var logInf *log.Logger
+var logErr *log.Logger
 
 func main() {
-
-	err := telegram.CreateBot()
+	f, err := os.OpenFile("info.log", os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
-		fmt.Println(err)
+		log.Fatal(err)
 	}
-	telegram.CheckUpdates()
-}
-
-func main2(){
-	var database Database
-	database.Init()
+	defer f.Close()
 	
-
-	database.Like(81, "second")
-	database.Like(82, "third")
-	database.Like(83, "fourth")
+	logInf = log.New(f, "INF\t", log.Ldate|log.Ltime)
+	logErr = log.New(f, "ERR\t", log.Lshortfile)
 	
-	fmt.Println(database.IsLike(81, "second"))
-	fmt.Println(database.IsLike(82, "second"))
+	err = telegram.CreateBot()
+	if err != nil {
+		logErr.Panic(err)
+	}
+	
+	err = telegram.CheckUpdates()
+	if err != nil {
+		logErr.Println(err)
+	}
 }

@@ -1,0 +1,17 @@
+INF	2021/04/25 03:37:43 228361536: CreateAnswer, input: Search by name
+INF	2021/04/25 03:37:46 228361536: CreateAnswer, input: jkhg
+INF	2021/04/25 03:37:46 228361536: AnswerName jkhg
+INF	2021/04/25 03:37:52 228361536: CreateAnswer, input: Lookup a random cocktail
+INF	2021/04/25 03:37:52 228361536: SendCocktail Almond Joy
+INF	2021/04/25 03:37:53 228361536: CreateAnswer, input: Lookup a random cocktail
+INF	2021/04/25 03:37:53 228361536: SendCocktail Zambeer
+INF	2021/04/25 03:37:54 228361536: CreateAnswer, input: Lookup a random cocktail
+INF	2021/04/25 03:37:54 228361536: SendCocktail Bruce's Puce
+INF	2021/04/25 03:37:54 228361536: CreateAnswer, input: Lookup a random cocktail
+INF	2021/04/25 03:37:54 228361536: SendCocktail Gimlet
+INF	2021/04/25 03:37:55 228361536: CreateAnswer, input: Lookup a random cocktail
+INF	2021/04/25 03:37:55 228361536: SendCocktail Clove Cocktail
+INF	2021/04/25 03:37:55 228361536: CreateAnswer, input: Lookup a random cocktail
+INF	2021/04/25 03:37:56 228361536: SendCocktail Cosmopolitan
+INF	2021/04/25 03:37:56 228361536: CreateAnswer, input: Lookup a random cocktail
+INF	2021/04/25 03:37:56 228361536: SendCocktail Egg Nog - Healthy
