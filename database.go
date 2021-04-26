@@ -58,10 +58,10 @@ type Database struct {
 
 func (database *Database) GetRangeOfLikes(chatID int64) (result []string, err error) {
 	database.db, err = sql.Open("sqlite3", "likes.db")
-	defer database.db.Close()
 	if err != nil{
 		return 
 	}
+	defer database.db.Close()
 	sqlResult, err := database.db.Query("select distinct likesStr from likes where chatID==" + strconv.FormatInt(chatID, 10))
 	for sqlResult.Next() {
 		result = append(result, "")
@@ -75,20 +75,20 @@ func (database *Database) GetRangeOfLikes(chatID int64) (result []string, err er
 
 func (database *Database) Like(chatID int64, cocktailID string)(err error) {
 	database.db, err = sql.Open("sqlite3", "likes.db")
-	defer database.db.Close()
 	if err != nil{
 		return 
 	}
+	defer database.db.Close()
 	_, err = database.db.Exec("insert into likes values (" + strconv.FormatInt(chatID, 10) + ", '" + cocktailID + "')")
 	return err
 }
 
 func (database *Database) IsLike(chatID int64, cocktailID string) (res bool, err error) {
 	database.db, err = sql.Open("sqlite3", "likes.db")
-	defer database.db.Close()
 	if err != nil{
 		return 
 	}
+	defer database.db.Close()
 	sqlResult, err := database.db.Query("select distinct likesStr from likes where chatID==" + strconv.FormatInt(chatID, 10) + " and likesStr==" + "'" + cocktailID + "'")
 	if err != nil {
 		return false, err

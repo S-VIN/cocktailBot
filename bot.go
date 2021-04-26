@@ -13,7 +13,7 @@ type Telegram struct {
 
 var telegram Telegram //struct for using telegram
 var clientStatus ClientStatus
-var database Database
+var database FDatabase
 
 var replyKeyboard = tgbotapi.NewReplyKeyboard(
 	tgbotapi.NewKeyboardButtonRow(
@@ -32,7 +32,7 @@ func (t *Telegram) CreateBot() (err error) {
 
 	clientStatus.status = make(map[int64]int)
 	clientStatus.shownCocktails = make(map[int64][]string)
-	//database = *NewFDatabase()
+	database = *NewFDatabase()
 
 	t.bot, err = tgbotapi.NewBotAPI("1356963581:AAGPlUyAkofdhcehODZ-jvIv9Qu9T196pRQ")
 	if err != nil {

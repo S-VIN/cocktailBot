@@ -1,0 +1,10 @@
+INF	2021/04/25 16:01:43 228361536: CreateAnswer, input: Lookup a random cocktail
+INF	2021/04/25 16:01:44 228361536: SendCocktail Snakebite and Black
+INF	2021/04/25 16:01:45 228361536: CreateAnswer, input: Lookup a random cocktail
+INF	2021/04/25 16:01:46 228361536: SendCocktail Flander's Flake-Out
+INF	2021/04/25 16:01:51 228361536: CreateAnswer, input: Get like list
+INF	2021/04/25 16:01:56 228361536: CreateAnswer, input: Lookup a random cocktail
+INF	2021/04/25 16:01:56 228361536: SendCocktail Rum Old-fashioned
+INF	2021/04/25 16:01:57 228361536: CreateAnswer, input: Lookup a random cocktail
+INF	2021/04/25 16:01:57 228361536: SendCocktail Amaretto Rose
+ERR	main.go:28: database is locked
